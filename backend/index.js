@@ -6,11 +6,16 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000/" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Replace with your frontend's URL
+    credentials: true, // Allow cookies to be sent
+  })
+);
 
 import "./config/passport.js";
 
@@ -25,14 +30,11 @@ app.post("/api/login", (req, res) => {
     console.log(">>> ~ app.post ~ token:", token);
 
     if (token) {
-
       res.cookie("token", token, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "lax",
-        maxAge: 30000 * 10000,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
         path: "/",
-        domain: "localhost",
+        sameSite: "lax",
       });
       return res
         .status(200)

@@ -17,16 +17,16 @@ export default function LoginPage() {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        await axios
-            .post(
-                "http://localhost:5000/api/login",
-                {
-                    // identifier: data.username,
-                    username: data.username,
-                    password: data.password,
-                }
-                // { credentials: "include" }
-            )
+        await fetch("http://localhost:5000/api/login", {
+            // identifier: data.username,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(data),
+        })
+            .then((res) => res.json())
             .then((res) => {
                 console.log(res);
                 console.log(res.data);
