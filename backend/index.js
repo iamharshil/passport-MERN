@@ -31,9 +31,11 @@ app.post("/api/login", (req, res) => {
 
     if (token) {
       res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        httpOnly: false,
+        // secure: process.env.NODE_ENV === "production",
+        secure: true,
         path: "/",
+        domain: "localhost",
         sameSite: "lax",
       });
       return res

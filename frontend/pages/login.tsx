@@ -1,12 +1,38 @@
-import axios from "axios";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
+import type { GetServerSideProps, GetServerSidePropsContext } from "next";
+
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+    const token = context.req.cookies.token;
+
+    return await fetch("http://localhost:5000/api/protected", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data?.success) {
+                return {
+                    redirect: {
+                        destination: "/",
+                        permanent: false,
+                    },
+                };
+            }
+            return { props: {} };
+        })
+        .catch((error) => {
+            console.error(error.message);
+            return { props: {} };
+        });
+};
 
 export default function LoginPage() {
     const router = useRouter();
     const [data, setData] = useState({ username: "test", password: "test" });
 
-    function handleChange(e) {
+    function handleChange(e: ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
         setData((prevState) => ({
             ...prevState,
@@ -14,11 +40,10 @@ export default function LoginPage() {
         }));
     }
 
-    async function handleSubmit(e) {
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
         await fetch("http://localhost:5000/api/login", {
-            // identifier: data.username,
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -28,32 +53,12 @@ export default function LoginPage() {
         })
             .then((res) => res.json())
             .then((res) => {
-                console.log(res);
-                console.log(res.data);
-                localStorage.setItem("token", res.data.token);
                 return router.push("/");
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error.message);
             });
     }
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        axios
-            .get("http://localhost:5000/api/protected", {
-                headers: {
-                    Authorization: token,
-                },
-            })
-            .then((res) => {
-                console.log(res.data);
-                return router.push("/");
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }, [router]);
 
     return (
         <div className="flex justify-center items-center h-screen">

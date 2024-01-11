@@ -1,29 +1,41 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import { useEffect } from "react";
-import axios from "axios";
-import { useRouter } from "next/router";
+import type { GetServerSideProps, GetServerSidePropsContext } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
-    const router = useRouter();
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        axios
-            .get("http://localhost:5000/api/protected", {
-                headers: {
-                    Authorization: token,
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+    const token = context.req.cookies.token;
+
+    return await fetch("http://localhost:5000/api/protected", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data?.success) {
+                return { props: {} };
+            }
+            return {
+                redirect: {
+                    destination: "/login",
+                    permanent: false,
                 },
-            })
-            .then((res) => {
-                console.log(res.data);
-            })
-            .catch((error) => {
-                console.log(error);
-                return router.push("/login");
-            });
-    }, [router]);
+            };
+        })
+        .catch((error) => {
+            console.error(error.message);
+            return {
+                redirect: {
+                    destination: "/login",
+                    permanent: false,
+                },
+            };
+        });
+};
+
+export default function Home() {
     return (
         <main className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}>
             <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
@@ -54,10 +66,10 @@ export default function Home() {
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    <h2 className={`mb-3 text-2xl font-semibold`}>
+                    <h2 className={"mb-3 text-2xl font-semibold"}>
                         Docs <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">-&gt;</span>
                     </h2>
-                    <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>Find in-depth information about Next.js features and API.</p>
+                    <p className={"m-0 max-w-[30ch] text-sm opacity-50"}>Find in-depth information about Next.js features and API.</p>
                 </a>
 
                 <a
@@ -66,10 +78,10 @@ export default function Home() {
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    <h2 className={`mb-3 text-2xl font-semibold`}>
+                    <h2 className={"mb-3 text-2xl font-semibold"}>
                         Learn <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">-&gt;</span>
                     </h2>
-                    <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
+                    <p className={"m-0 max-w-[30ch] text-sm opacity-50"}>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
                 </a>
 
                 <a
@@ -78,10 +90,10 @@ export default function Home() {
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    <h2 className={`mb-3 text-2xl font-semibold`}>
+                    <h2 className={"mb-3 text-2xl font-semibold"}>
                         Templates <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">-&gt;</span>
                     </h2>
-                    <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>Discover and deploy boilerplate example Next.js&nbsp;projects.</p>
+                    <p className={"m-0 max-w-[30ch] text-sm opacity-50"}>Discover and deploy boilerplate example Next.js&nbsp;projects.</p>
                 </a>
 
                 <a
@@ -90,10 +102,10 @@ export default function Home() {
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    <h2 className={`mb-3 text-2xl font-semibold`}>
+                    <h2 className={"mb-3 text-2xl font-semibold"}>
                         Deploy <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">-&gt;</span>
                     </h2>
-                    <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>Instantly deploy your Next.js site to a shareable URL with Vercel.</p>
+                    <p className={"m-0 max-w-[30ch] text-sm opacity-50"}>Instantly deploy your Next.js site to a shareable URL with Vercel.</p>
                 </a>
             </div>
         </main>
